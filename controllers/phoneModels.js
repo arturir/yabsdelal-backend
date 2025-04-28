@@ -12,6 +12,7 @@ module.exports.getAllModelsPhone = (req, res, next) => {
 }
 
 module.exports.getModelsPhoneByBrand = (req, res, next) => {
+    console.log(req.params.brandId)
     Brand.findById(req.params.brandId)
     .then(brand => {
       if (!brand) {
@@ -45,7 +46,7 @@ module.exports.createModelPhone = (req, res, next) => {
             throw new BadRequestError("ID бренда указано неверно или отсутствует.");
         }
     })
-    .catch(err => errorHandler(err, next))
+    .catch(err => errorHandler(err, next)) // выкидывает ошибку при передаче неправильного ID и сервер падает
 }
 
 module.exports.deleteModelPhone = (req, res, next) => {
