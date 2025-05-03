@@ -6,7 +6,7 @@ const chatId = process.env.TG_CHATID;
 const apiURL = `https://api.telegram.org/bot${token}/sendMessage`;
 
 module.exports.sendOrder = (req, res, next) => {
-    const {modelID, serviceID, customer, phone} = req.body;
+    const {modelID, serviceID, customer, phone, contactMethod} = req.body;
     PhoneModel.findById(modelID)
     .then((phoneModel) => {
         if (!phoneModel) {
@@ -21,7 +21,8 @@ module.exports.sendOrder = (req, res, next) => {
                 service: service.name,
                 price: service.price,
                 customer,
-                phone
+                phone,
+                contactMethod: contactMethod
             } 
             return order
         }          
@@ -34,7 +35,7 @@ module.exports.sendOrder = (req, res, next) => {
             },
             body: JSON.stringify({
                 chat_id: chatId,            
-                text: `ЗАЯВКА НА РЕМОНТ \nМодель телефона: ${order.model} \nУслуга: ${order.service} \nЦена: ${order.price} \nКлиент: ${order.customer} \nНомер: ${order.phone}`,
+                text: `ЗАЯВКА НА РЕМОНТ \nМодель телефона: ${order.model} \nУслуга: ${order.service} \nЦена: ${order.price} \nКлиент: ${order.customer} \n${order.contactMethod==='phone' ? 'Связаться по телефону: ' : 'Связаться через мессндежры: '} ${order.phone}`,
             }),
         })
         .then(response => response.json())
@@ -46,7 +47,7 @@ module.exports.sendOrder = (req, res, next) => {
 
 
 module.exports.sendCallback = (req, res, next) => {
-    const {customer, phone} = req.body;
+    const {customer, phone, contactMethod} = req.body;
     fetch(apiURL, {
         method: 'POST',
         headers: {
@@ -54,7 +55,7 @@ module.exports.sendCallback = (req, res, next) => {
         },
         body: JSON.stringify({
             chat_id: chatId,            
-            text: `ПЕРЕЗВОНИТЕ МНЕ\nКлиент: ${customer} \nНомер: ${phone}`,
+            text: `${contactMethod==='phone' ? 'СВЯЗАТЬСЯ ПО ТЕЛЕФОНУ' : 'СВЯЗАТЬСЯ ЧЕРЕЗ МЕССЕНДЖЕРЫ'}\nКлиент: ${customer} \nНомер: ${phone}`,
         }),
     })
     .then(response => response.json())
